@@ -316,8 +316,27 @@ size: $(OUTDIR)/${TARGET}
 	@echo
 	@avr-size ${AVRSIZEFLAGS}
 
+## Native Linux x86_64 port
+LINUX_PORT_DIR = linux/cuzebox
+LINUX_TARGET   = $(OUTDIR)/foad-linux-x64
+
+.PHONY: linux-x64 linux-run linux-smoke linux-clean
+linux-x64:
+	@test "`uname -s`" = "Linux" || { echo "error: linux-x64 requires Linux" >&2; exit 1; }
+	@test "`uname -m`" = "x86_64" || { echo "error: linux-x64 requires x86_64" >&2; exit 1; }
+	@pkg-config --exists sdl2 || { echo "error: SDL2 development files are required (for example, libsdl2-dev)" >&2; exit 1; }
+	$(MAKE) -C $(LINUX_PORT_DIR) all
+
+linux-run: linux-x64
+	./$(LINUX_TARGET)
+
+linux-smoke: linux-x64
+	@$(MAKE) -C $(LINUX_PORT_DIR) smoke
+
+linux-clean:
+	$(MAKE) -C $(LINUX_PORT_DIR) clean
+
 ## Clean target
 .PHONY: clean
 clean:
 	-rm -rf $(DIRS)
-

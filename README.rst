@@ -61,6 +61,35 @@ Make producing the .hex file. To get a .uze file, you need the UzeRom packager
 
 
 
+Linux x86_64 port
+------------------------------------------------------------------------------
+
+
+The repository also contains a native Linux x86_64 build. It embeds the
+released game ROM in a small SDL2-based compatibility layer, preserving the
+original gameplay, timing, graphics, sound and controller behavior without
+requiring a separate emulator or ROM file.
+
+On Debian or Ubuntu, install the native build dependencies with::
+
+  sudo apt install build-essential pkg-config libsdl2-dev
+
+Then build and run it with::
+
+  make linux-x64
+  ./_bin_/foad-linux-x64
+
+``make linux-run`` builds and starts the game in one command. High scores are
+stored in SDL's per-user application data directory (normally below
+``~/.local/share/Jubatian/Flight of a Dragon/``).
+
+The compatibility layer is based on CUzeBox and is included in source form
+under ``linux/cuzebox``. See ``linux/cuzebox/UPSTREAM.md`` and its ``LICENSE``
+for provenance and licensing details.
+
+
+
+
 Controls
 ------------------------------------------------------------------------------
 
@@ -79,6 +108,20 @@ During high score entry, the followings are used:
 - Dpad: Navigate between characters, select character
 - A, X, B, Y, Shoulders: Toggle Upper / Lowercase
 - Enter, Select: Accept name
+
+For the Linux build, keyboard controls map to the SNES controller as follows:
+
+- Arrow keys: D-pad
+- S or W: jump (SNES A or X)
+- A or Q: fire (SNES B or Y)
+- Left Shift: left shoulder (look up)
+- Right Shift: right shoulder (walk)
+- Enter: Start
+- Space or Tab: Select
+- Escape: quit
+- F9: pause; F11: toggle fullscreen
+
+SDL2-compatible game controllers are also supported.
 
 
 

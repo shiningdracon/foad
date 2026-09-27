@@ -16,8 +16,8 @@
 !/assets/*.it
 /kernelm74/videoMode74/examples
 /kernelm74/videoMode74/generators
-cuzebox
-cuzebox.*
-uzem
-uzem.*
+/cuzebox
+/cuzebox.*
+/uzem
+/uzem.*
 eeprom.bin
