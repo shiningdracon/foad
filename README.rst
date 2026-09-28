@@ -141,9 +141,12 @@ Build the browser edition with::
   make web-zh
   make web-run-zh
 
-The deployable Chinese site is generated in ``_bin_/web-zh``. Chinese and
-English builds use separate high-score storage, so trying one edition cannot
-overwrite scores from the other.
+The English development server uses ``http://localhost:8000`` and the Chinese
+server uses ``http://localhost:8001``. Both disable browser caching so switching
+editions cannot reuse the other build's WebAssembly files. The deployable
+Chinese site is generated in ``_bin_/web-zh``. Chinese and English builds use
+separate high-score storage, so trying one edition cannot overwrite scores from
+the other.
 
 The emulator overlay is rasterized from Noto Sans CJK SC. It leaves the ROM's
 original global charset untouched because the gameplay status bar shares those

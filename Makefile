@@ -339,6 +339,7 @@ linux-clean:
 ## Browser / WebAssembly port
 WEB_OUT_DIR = $(OUTDIR)/web
 EM_CACHE_DIR ?= /tmp/foad-emscripten-cache
+WEB_PORT ?= 8000
 
 .PHONY: web web-run web-smoke web-clean
 web:
@@ -349,8 +350,8 @@ web:
 		OUT=../../$(WEB_OUT_DIR)/index.html WEB_SHELL=../../web/shell.html
 
 web-run: web
-	@echo "Open http://localhost:8000"
-	python3 -m http.server 8000 --directory $(WEB_OUT_DIR)
+	@echo "Open http://localhost:$(WEB_PORT)"
+	python3 tools/serve_web.py --port $(WEB_PORT) --directory $(WEB_OUT_DIR)
 
 web-smoke: web
 	@test -s $(WEB_OUT_DIR)/index.html
@@ -368,6 +369,7 @@ ZH_HEX        = $(OUTDIR)/foad-zh.hex
 ZH_LINUX_OUT  = $(OUTDIR)/foad-linux-x64-zh
 ZH_WEB_OUT_DIR = $(OUTDIR)/web-zh
 ZH_WEB_SHELL   = $(LINUX_PORT_DIR)/_obj_web_zh_/shell.html
+ZH_WEB_PORT    ?= 8001
 
 .PHONY: zh zh-rom linux-x64-zh linux-run-zh linux-smoke-zh web-zh web-run-zh web-smoke-zh zh-clean
 zh: linux-x64-zh web-zh
@@ -410,8 +412,8 @@ web-zh: zh-rom $(ZH_WEB_SHELL)
 		GAMEFILE_C=_obj_web_zh_/gamefile.c EXTRA_CFLAGS=-DFOAD_ZH_CN=1
 
 web-run-zh: web-zh
-	@echo "Open http://localhost:8000"
-	python3 -m http.server 8000 --directory $(ZH_WEB_OUT_DIR)
+	@echo "Open http://localhost:$(ZH_WEB_PORT)"
+	python3 tools/serve_web.py --port $(ZH_WEB_PORT) --directory $(ZH_WEB_OUT_DIR)
 
 web-smoke-zh: web-zh
 	@test -s $(ZH_WEB_OUT_DIR)/index.html
