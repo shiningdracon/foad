@@ -21,3 +21,5 @@
 /uzem
 /uzem.*
 eeprom.bin
+__pycache__/
+*.pyc

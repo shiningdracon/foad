@@ -1,0 +1,218 @@
+/*
+ * Readable Chinese text overlay for Flight of a Dragon.
+ *
+ * The original game has six visible pixels in each 8-pixel text cell, which
+ * is too narrow for Chinese.  The localized ROM places a blank continuation
+ * cell after every Han character.  This renderer replaces that two-cell area
+ * with a complete 15x16 source glyph at a much larger, square size.
+ */
+
+#include "foad_zh.h"
+
+#ifdef FOAD_ZH_CN
+
+#include "cu_avr.h"
+#include "guicore.h"
+
+#define FOAD_ZH_VRAM_STORY 0x0BB8U
+#define FOAD_ZH_VRAM_INTRO 0x0C98U
+#define FOAD_ZH_SPACE      0x60U
+#define FOAD_ZH_PITCH      640U
+
+#include "foad_zh_glyphs.h"
+
+static auint foad_zh_channel_difference(auint first, auint second)
+{
+ return (first > second) ? (first - second) : (second - first);
+}
+
+static auint foad_zh_color_difference(
+    uint32 first,
+    uint32 second,
+    guicore_pixfmt_t const* format)
+{
+ return foad_zh_channel_difference(
+            (first >> format->rsh) & 0xFFU,
+            (second >> format->rsh) & 0xFFU) +
+        foad_zh_channel_difference(
+            (first >> format->gsh) & 0xFFU,
+            (second >> format->gsh) & 0xFFU) +
+        foad_zh_channel_difference(
+            (first >> format->bsh) & 0xFFU,
+            (second >> format->bsh) & 0xFFU);
+}
+
+static uint32 foad_zh_text_color(
+    uint32 const* pixels,
+    auint x,
+    auint y,
+    uint32 background)
+{
+ guicore_pixfmt_t format;
+ uint32 best = background;
+ auint best_difference = 0U;
+ auint px;
+ auint py;
+
+ guicore_getpixfmt(&format);
+ for (py = 0U; py < 8U; py++){
+  for (px = 0U; px < 18U; px++){
+   uint32 candidate = pixels[((y + py) * FOAD_ZH_PITCH) + x + px];
+   auint difference = foad_zh_color_difference(candidate, background, &format);
+   if (difference > best_difference){
+    best_difference = difference;
+    best = candidate;
+   }
+  }
+ }
+ return best;
+}
+
+static void foad_zh_character(
+    uint32* pixels,
+    uint32 background,
+    uint32 foreground,
+    auint x,
+    auint y,
+    uint16 const* glyph)
+{
+ auint px;
+ auint py;
+ auint sx;
+
+ for (py = 0U; py < 16U; py++){
+  for (px = 0U; px < 36U; px++){
+   pixels[((y + py) * FOAD_ZH_PITCH) + x + px] = background;
+  }
+ }
+
+ /* Two horizontal pixels and one scanline become a square on screen. */
+ for (py = 0U; py < 16U; py++){
+  for (px = 0U; px < 15U; px++){
+   if ((glyph[py] & (0x4000U >> px)) != 0U){
+    for (sx = 0U; sx < 2U; sx++){
+     pixels[((y + py) * FOAD_ZH_PITCH) +
+            x + 3U + (px * 2U) + sx] = foreground;
+    }
+   }
+  }
+ }
+}
+
+static boole foad_zh_has_glyph(uint16 const* glyph)
+{
+ auint row;
+ uint16 bits = 0U;
+
+ for (row = 0U; row < 16U; row++){
+  bits |= glyph[row];
+ }
+ return bits != 0U;
+}
+
+static uint32 foad_zh_screen_text_color(
+    cu_state_cpu_t const* cpu,
+    uint32 const* pixels,
+    auint vram,
+    auint rows,
+    auint xstart,
+    auint ybase,
+    boole* valid)
+{
+ guicore_pixfmt_t format;
+ uint32 best = 0U;
+ auint best_difference = 0U;
+ auint x;
+ auint y;
+
+ guicore_getpixfmt(&format);
+ for (y = 0U; y < rows; y++){
+  for (x = xstart; x < 30U; x++){
+   uint8 code = cpu->sram[vram + (y * 32U) + x];
+   if (foad_zh_has_glyph(&(foad_zh_glyphs[code][0])) &&
+       (cpu->sram[vram + (y * 32U) + x + 1U] == FOAD_ZH_SPACE)){
+    auint xpos = 40U + (x * 18U);
+    auint ypos = ybase + (y * 8U);
+    uint32 background =
+        pixels[((ypos + 4U) * FOAD_ZH_PITCH) + xpos + 27U];
+    uint32 candidate =
+        foad_zh_text_color(pixels, xpos, ypos, background);
+    auint difference =
+        foad_zh_color_difference(candidate, background, &format);
+    if (difference > best_difference){
+     best_difference = difference;
+     best = candidate;
+    }
+    x++;
+   }
+  }
+ }
+ *valid = best_difference != 0U;
+ return best;
+}
+
+void foad_zh_draw(void)
+{
+ cu_state_cpu_t const* cpu = cu_avr_get_state();
+ uint32* pixels = guicore_getpixbuf();
+ auint vram;
+ auint rows;
+ auint xstart;
+ auint ybase;
+ uint32 screen_foreground;
+ boole screen_color_valid;
+ auint x;
+ auint y;
+
+ /* The first row selector distinguishes intro/death from story display. */
+ if (cpu->sram[0] == 152U){
+  vram = FOAD_ZH_VRAM_INTRO;
+  rows = 11U;
+  xstart = 0U;
+  ybase = 57U;
+ }else if ((cpu->sram[0] == 249U) && (cpu->sram[3] == 224U)){
+  vram = FOAD_ZH_VRAM_STORY;
+  rows = 16U;
+  xstart = 2U;
+  ybase = 67U;
+ }else{
+  return;
+ }
+
+ /* Some original tile numbers are intentionally blank. Sample one shared
+ ** foreground color from the whole text screen so those Han glyphs still
+ ** render without changing the game's global charset. */
+
+ screen_foreground = foad_zh_screen_text_color(
+     cpu, pixels, vram, rows, xstart, ybase, &screen_color_valid);
+
+ for (y = 0U; y < rows; y++){
+  for (x = xstart; x < 30U; x++){
+   uint8 code = cpu->sram[vram + (y * 32U) + x];
+   uint16 const* glyph = &(foad_zh_glyphs[code][0]);
+   if (foad_zh_has_glyph(glyph) &&
+       (cpu->sram[vram + (y * 32U) + x + 1U] == FOAD_ZH_SPACE)){
+    auint xpos = 40U + (x * 18U);
+    auint ypos = ybase + (y * 8U);
+    uint32 background =
+        pixels[((ypos + 4U) * FOAD_ZH_PITCH) + xpos + 27U];
+    uint32 foreground = foad_zh_text_color(pixels, xpos, ypos, background);
+    if ((foreground == background) && screen_color_valid){
+     foreground = screen_foreground;
+    }
+    if (foreground != background){
+     foad_zh_character(pixels, background, foreground, xpos, ypos, glyph);
+    }
+    x++;
+   }
+  }
+ }
+}
+
+#else
+
+void foad_zh_draw(void)
+{
+}
+
+#endif

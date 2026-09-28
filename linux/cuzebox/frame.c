@@ -30,6 +30,7 @@
 #include "frame.h"
 #include "guicore.h"
 #include "textgui.h"
+#include "foad_zh.h"
 
 
 
@@ -585,6 +586,10 @@ auint frame_run(boole drop, boole merge)
  }
 
  frame_ctr ++;
+
+ /* The localized ROM uses two text cells per Han character. */
+
+ if (!drop){ foad_zh_draw(); }
 
  /* Add text GUI elements */
 

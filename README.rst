@@ -116,6 +116,42 @@ storage.
 
 
 
+Simplified Chinese edition
+------------------------------------------------------------------------------
+
+
+The Chinese edition localizes the title, prompts and story panels while
+preserving the original game engine. Each Han character uses two text cells;
+the bundled Linux and browser emulators render a clear 15x16-pixel glyph and
+add extra story-line spacing. It is produced reproducibly from the released
+ROM, so building it does not need the AVR toolchain.
+
+Build the Uzebox ROM files with::
+
+  make zh-rom
+
+This creates ``_bin_/foad-zh.uze`` and ``_bin_/foad-zh.hex``. Build and run
+the native Linux edition with::
+
+  make linux-x64-zh
+  ./_bin_/foad-linux-x64-zh
+
+Build the browser edition with::
+
+  make web-zh
+  make web-run-zh
+
+The deployable Chinese site is generated in ``_bin_/web-zh``. Chinese and
+English builds use separate high-score storage, so trying one edition cannot
+overwrite scores from the other.
+
+The emulator overlay is rasterized from Noto Sans CJK SC. It leaves the ROM's
+original global charset untouched because the gameplay status bar shares those
+tile numbers with text. Font notices are included in ``localization/``.
+
+
+
+
 Controls
 ------------------------------------------------------------------------------
 

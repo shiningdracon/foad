@@ -32,6 +32,16 @@
 
 
 
+#ifdef FOAD_ZH_CN
+#define FOAD_EEPROM_KEY "flight-of-a-dragon.zh-CN.eeprom"
+#define FOAD_APP_NAME   "Flight of a Dragon zh-CN"
+#else
+#define FOAD_EEPROM_KEY "flight-of-a-dragon.eeprom"
+#define FOAD_APP_NAME   "Flight of a Dragon"
+#endif
+
+
+
 /* EEPROM dump file */
 #ifndef __EMSCRIPTEN__
 static const char eepdump_file[] = "eeprom.bin";
@@ -40,9 +50,9 @@ static const char eepdump_file[] = "eeprom.bin";
 
 #ifdef __EMSCRIPTEN__
 /* Browser builds persist the emulated EEPROM as a hexadecimal string. */
-EM_JS(int, eepdump_web_load, (uint8* eeprom), {
+EM_JS(int, eepdump_web_load, (uint8* eeprom, char const* key), {
  try {
-  var data = localStorage.getItem("flight-of-a-dragon.eeprom");
+  var data = localStorage.getItem(UTF8ToString(key));
   if ((data === null) || (data.length !== 4096)) { return 0; }
   for (var i = 0; i < 2048; i++) {
    HEAPU8[eeprom + i] = parseInt(data.substr(i * 2, 2), 16);
@@ -53,13 +63,13 @@ EM_JS(int, eepdump_web_load, (uint8* eeprom), {
  }
 })
 
-EM_JS(void, eepdump_web_save, (uint8 const* eeprom), {
+EM_JS(void, eepdump_web_save, (uint8 const* eeprom, char const* key), {
  try {
   var hex = "";
   for (var i = 0; i < 2048; i++) {
    hex += HEAPU8[eeprom + i].toString(16).padStart(2, "0");
   }
-  localStorage.setItem("flight-of-a-dragon.eeprom", hex);
+  localStorage.setItem(UTF8ToString(key), hex);
  } catch (error) {
   console.warn("Could not save Flight of a Dragon high scores", error);
  }
@@ -77,7 +87,7 @@ static char* eepdump_prefpath(void)
  size_t baselen;
  size_t filelen;
 
- base = SDL_GetPrefPath("Jubatian", "Flight of a Dragon");
+ base = SDL_GetPrefPath("Jubatian", FOAD_APP_NAME);
  if (base == NULL){ return NULL; }
 
  baselen = strlen(base);
@@ -101,7 +111,7 @@ static char* eepdump_prefpath(void)
 void eepdump_load(uint8* eeprom)
 {
 #ifdef __EMSCRIPTEN__
- if (!eepdump_web_load(eeprom)){
+ if (!eepdump_web_load(eeprom, FOAD_EEPROM_KEY)){
   memset(eeprom, 0xFFU, 2048U);
  }
  return;
@@ -151,7 +161,7 @@ ex_fail:
 void eepdump_save(uint8 const* eeprom)
 {
 #ifdef __EMSCRIPTEN__
- eepdump_web_save(eeprom);
+ eepdump_web_save(eeprom, FOAD_EEPROM_KEY);
 #elif defined(FLAG_SELFCONT)
  FILE* file;
  char* path;

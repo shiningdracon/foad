@@ -37,8 +37,9 @@
 
 include Make_defines.mk
 
-CFLAGS  +=
+CFLAGS  += -I.
 GAMEFILE ?= ../../_bin_/foad.uze
+GAMEFILE_C ?= gamefile.c
 
 OBJECTS  = $(OBD)/main.o
 OBJECTS += $(OBD)/cu_ufile.o
@@ -60,6 +61,7 @@ OBJECTS += $(OBD)/guicore.o
 OBJECTS += $(OBD)/audio.o
 OBJECTS += $(OBD)/ginput.o
 OBJECTS += $(OBD)/frame.o
+OBJECTS += $(OBD)/foad_zh.o
 OBJECTS += $(OBD)/chars.o
 OBJECTS += $(OBD)/textgui.o
 OBJECTS += $(OBD)/conout.o
@@ -94,7 +96,7 @@ endif
 all: $(OUT)
 clean:
 	rm    -f $(OBJECTS) $(OUT)
-	rm    -f gamefile.c
+	rm    -f $(GAMEFILE_C)
 	rm    -f assets/$(CHCONV)
 	rm    -f assets/$(BINCONV)
 	rm -d -f $(OBD)
@@ -120,8 +122,8 @@ assets/$(CHCONV): assets/chconv.c assets/charset.h
 
 # Special: Generate C source from a gamefile.uze for a self-contained build.
 
-gamefile.c: assets/$(BINCONV) $(GAMEFILE)
-	assets/$(BINCONV) <$(GAMEFILE) >gamefile.c
+$(GAMEFILE_C): assets/$(BINCONV) $(GAMEFILE) | $(OBD)
+	assets/$(BINCONV) <$(GAMEFILE) >$(GAMEFILE_C)
 
 assets/$(BINCONV): assets/binconv.c
 	$(CCNAT) $< -o $@ -Wall
@@ -179,6 +181,9 @@ $(OBD)/ginput.o: ginput.c $(DEPS)
 $(OBD)/frame.o: frame.c $(DEPS)
 	$(CC) -c $< -o $@ $(CFSPD)
 
+$(OBD)/foad_zh.o: foad_zh.c $(DEPS)
+	$(CC) -c $< -o $@ $(CFSIZ)
+
 $(OBD)/eepdump.o: eepdump.c $(DEPS)
 	$(CC) -c $< -o $@ $(CFSIZ)
 
@@ -197,7 +202,7 @@ $(OBD)/conout.o: conout.c $(DEPS)
 $(OBD)/chars.o: chars.c $(DEPS)
 	$(CC) -c $< -o $@ $(CFSIZ)
 
-$(OBD)/gamefile.o: gamefile.c $(DEPS)
+$(OBD)/gamefile.o: $(GAMEFILE_C) $(DEPS)
 	$(CC) -c $< -o $@ $(CFSIZ)
 
 

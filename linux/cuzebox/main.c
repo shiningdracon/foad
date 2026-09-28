@@ -46,7 +46,11 @@
 
 
 /* Initial title */
+#ifdef FOAD_ZH_CN
+static const char main_title[] = "Flight of a Dragon - Chinese";
+#else
 static const char main_title[] = "Flight of a Dragon";
+#endif
 
 /* Exit request */
 static boole main_exit = FALSE;

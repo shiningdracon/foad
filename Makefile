@@ -362,6 +362,71 @@ web-clean:
 	$(MAKE) -C $(LINUX_PORT_DIR) clean TSYS=emscripten OBD=_obj_web_ OUT=../../$(WEB_OUT_DIR)/index.html
 	-rm -rf $(WEB_OUT_DIR)
 
+## Simplified Chinese edition
+ZH_ROM        = $(OUTDIR)/foad-zh.uze
+ZH_HEX        = $(OUTDIR)/foad-zh.hex
+ZH_LINUX_OUT  = $(OUTDIR)/foad-linux-x64-zh
+ZH_WEB_OUT_DIR = $(OUTDIR)/web-zh
+ZH_WEB_SHELL   = $(LINUX_PORT_DIR)/_obj_web_zh_/shell.html
+
+.PHONY: zh zh-rom linux-x64-zh linux-run-zh linux-smoke-zh web-zh web-run-zh web-smoke-zh zh-clean
+zh: linux-x64-zh web-zh
+
+zh-rom: $(ZH_ROM) $(ZH_HEX)
+
+$(ZH_ROM): tools/localize_zh.py
+	@test -s $(OUTDIR)/foad.uze || { echo "error: released ROM $(OUTDIR)/foad.uze is missing" >&2; exit 1; }
+	python3 tools/localize_zh.py --input $(OUTDIR)/foad.uze --uze $(ZH_ROM) --hex $(ZH_HEX)
+
+$(ZH_HEX): $(ZH_ROM)
+	@test -s $(ZH_HEX) || python3 tools/localize_zh.py --input $(OUTDIR)/foad.uze --uze $(ZH_ROM) --hex $(ZH_HEX)
+
+linux-x64-zh: zh-rom
+	@test "`uname -s`" = "Linux" || { echo "error: linux-x64-zh requires Linux" >&2; exit 1; }
+	@test "`uname -m`" = "x86_64" || { echo "error: linux-x64-zh requires x86_64" >&2; exit 1; }
+	@pkg-config --exists sdl2 || { echo "error: SDL2 development files are required (for example, libsdl2-dev)" >&2; exit 1; }
+	$(MAKE) -C $(LINUX_PORT_DIR) all OBD=_obj_zh_ OUT=../../$(ZH_LINUX_OUT) \
+		GAMEFILE=../../$(ZH_ROM) GAMEFILE_C=_obj_zh_/gamefile.c EXTRA_CFLAGS=-DFOAD_ZH_CN=1
+
+linux-run-zh: linux-x64-zh
+	./$(ZH_LINUX_OUT)
+
+linux-smoke-zh: linux-x64-zh
+	@$(MAKE) -C $(LINUX_PORT_DIR) smoke OBD=_obj_zh_ OUT=../../$(ZH_LINUX_OUT) \
+		GAMEFILE=../../$(ZH_ROM) GAMEFILE_C=_obj_zh_/gamefile.c EXTRA_CFLAGS=-DFOAD_ZH_CN=1
+
+$(ZH_WEB_SHELL): web/shell.html
+	@mkdir -p $(dir $@)
+	sed -e 's#<title>Flight of a Dragon</title>#<title>飞龙逃亡</title>#' \
+		-e 's#A Uzebox adventure · WebAssembly edition#UZebox 冒险 · WebAssembly 中文版#' \
+		-e 's#<h1>Flight of a Dragon</h1>#<h1>飞龙逃亡</h1>#' $< >$@
+
+web-zh: zh-rom $(ZH_WEB_SHELL)
+	@command -v emcc >/dev/null || { echo "error: Emscripten is required (emcc was not found)" >&2; exit 1; }
+	@mkdir -p $(ZH_WEB_OUT_DIR) $(EM_CACHE_DIR)
+	EM_CACHE=$(EM_CACHE_DIR) $(MAKE) -C $(LINUX_PORT_DIR) all \
+		TSYS=emscripten OBD=_obj_web_zh_ OUT=../../$(ZH_WEB_OUT_DIR)/index.html \
+		WEB_SHELL=_obj_web_zh_/shell.html GAMEFILE=../../$(ZH_ROM) \
+		GAMEFILE_C=_obj_web_zh_/gamefile.c EXTRA_CFLAGS=-DFOAD_ZH_CN=1
+
+web-run-zh: web-zh
+	@echo "Open http://localhost:8000"
+	python3 -m http.server 8000 --directory $(ZH_WEB_OUT_DIR)
+
+web-smoke-zh: web-zh
+	@test -s $(ZH_WEB_OUT_DIR)/index.html
+	@test -s $(ZH_WEB_OUT_DIR)/index.js
+	@test -s $(ZH_WEB_OUT_DIR)/index.wasm
+	@echo "Chinese WebAssembly build smoke test passed"
+
+zh-clean:
+	$(MAKE) -C $(LINUX_PORT_DIR) clean OBD=_obj_zh_ OUT=../../$(ZH_LINUX_OUT) \
+		GAMEFILE_C=_obj_zh_/gamefile.c
+	-rm -f $(ZH_WEB_SHELL)
+	$(MAKE) -C $(LINUX_PORT_DIR) clean TSYS=emscripten OBD=_obj_web_zh_ \
+		OUT=../../$(ZH_WEB_OUT_DIR)/index.html GAMEFILE_C=_obj_web_zh_/gamefile.c
+	-rm -rf $(ZH_ROM) $(ZH_HEX) $(ZH_WEB_OUT_DIR)
+
 ## Clean target
 .PHONY: clean
 clean:

@@ -1,0 +1,4 @@
+The emulator overlay contains a rasterized Simplified Chinese subset derived
+from Noto Sans CJK. Noto Sans CJK is licensed under the SIL Open Font License,
+Version 1.1. The complete SIL OFL 1.1 terms are reproduced in
+BoutiqueBitmap7x7-OFL.txt in this directory.
