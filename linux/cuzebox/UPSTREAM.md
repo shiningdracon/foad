@@ -11,6 +11,8 @@ executable.
 
 Local changes select the game-only UI, embed `../../_bin_/foad.uze`, use
 `pkg-config` for SDL2, name the application *Flight of a Dragon*, and preserve
-the game's EEPROM/high scores in SDL's per-user preference directory.
+the game's EEPROM/high scores in SDL's per-user preference directory or the
+browser's local storage. The Emscripten configuration was also updated for a
+modern WebAssembly build and the custom browser shell in `../../web`.
 
 Only files required by the self-contained native build are vendored.

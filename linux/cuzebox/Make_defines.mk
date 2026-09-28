@@ -89,8 +89,12 @@ endif
 # Emscripten - specific
 #
 ifeq ($(TSYS),emscripten)
-OUT=cuzebox.html
-CFLAGS+= -DTARGET_EMSCRIPTEN -DUSE_SDL1 -s USE_SDL=1 -s NO_EXIT_RUNTIME=1 -s NO_DYNAMIC_EXECUTION=1
+OUT?=../../_bin_/web/index.html
+CFLAGS+= -DTARGET_EMSCRIPTEN -DUSE_SDL1 -sUSE_SDL=1
+LINKB= -sUSE_SDL=1 -sEXIT_RUNTIME=0 -sENVIRONMENT=web -sALLOW_MEMORY_GROWTH=1
+ifneq ($(WEB_SHELL),)
+LINKB+= --shell-file $(WEB_SHELL)
+endif
 ENABLE_VCAP=0
 ifeq ($(FLAG_SELFCONT),0)
 ifeq ($(FLAG_NOGAMEFILE),0)
@@ -112,8 +116,8 @@ endif
 # 'Production' edit
 #
 ifeq ($(TSYS),emscripten)
-CFSPD?=-O3 --llvm-lto 3 -s ASSERTIONS=0 -s AGGRESSIVE_VARIABLE_ELIMINATION=1
-CFSIZ?=-Os --llvm-lto 3 -s ASSERTIONS=0
+CFSPD?=-O3 -flto
+CFSIZ?=-Os -flto
 else
 CFSPD?=-O3 -s -flto
 CFSIZ?=-Os -s -flto

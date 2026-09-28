@@ -86,6 +86,10 @@ endif
 
 
 DEPS     = *.h Makefile Make_defines.mk Make_config.mk
+WEB_DEPS =
+ifneq ($(WEB_SHELL),)
+WEB_DEPS += $(WEB_SHELL)
+endif
 
 all: $(OUT)
 clean:
@@ -98,7 +102,7 @@ clean:
 $(ROMFILE):
 	$(error You need to supply a gamefile.uze for Emscripten build)
 
-$(OUT): $(OBD) $(OBJECTS) $(ROMFILE)
+$(OUT): $(OBD) $(OBJECTS) $(ROMFILE) $(WEB_DEPS)
 	$(CC) -o $(OUT) $(OBJECTS) $(CFSPD) $(LINK)
 
 $(OBD):

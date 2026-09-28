@@ -33,10 +33,38 @@
 
 
 /* EEPROM dump file */
+#ifndef __EMSCRIPTEN__
 static const char eepdump_file[] = "eeprom.bin";
+#endif
 
 
-#ifdef FLAG_SELFCONT
+#ifdef __EMSCRIPTEN__
+/* Browser builds persist the emulated EEPROM as a hexadecimal string. */
+EM_JS(int, eepdump_web_load, (uint8* eeprom), {
+ try {
+  var data = localStorage.getItem("flight-of-a-dragon.eeprom");
+  if ((data === null) || (data.length !== 4096)) { return 0; }
+  for (var i = 0; i < 2048; i++) {
+   HEAPU8[eeprom + i] = parseInt(data.substr(i * 2, 2), 16);
+  }
+  return 1;
+ } catch (error) {
+  return 0;
+ }
+})
+
+EM_JS(void, eepdump_web_save, (uint8 const* eeprom), {
+ try {
+  var hex = "";
+  for (var i = 0; i < 2048; i++) {
+   hex += HEAPU8[eeprom + i].toString(16).padStart(2, "0");
+  }
+  localStorage.setItem("flight-of-a-dragon.eeprom", hex);
+ } catch (error) {
+  console.warn("Could not save Flight of a Dragon high scores", error);
+ }
+})
+#elif defined(FLAG_SELFCONT)
 /*
 ** The generic self-contained CUzeBox backend intentionally has no writable
 ** filesystem. The desktop port still needs persistent high scores, so store
@@ -72,7 +100,12 @@ static char* eepdump_prefpath(void)
 */
 void eepdump_load(uint8* eeprom)
 {
-#ifdef FLAG_SELFCONT
+#ifdef __EMSCRIPTEN__
+ if (!eepdump_web_load(eeprom)){
+  memset(eeprom, 0xFFU, 2048U);
+ }
+ return;
+#elif defined(FLAG_SELFCONT)
  FILE* file;
  char* path;
 
@@ -99,11 +132,13 @@ void eepdump_load(uint8* eeprom)
  return;
 #endif
 
+#ifndef __EMSCRIPTEN__
 ex_fail:
 #ifndef FLAG_SELFCONT
  filesys_flush(FILESYS_CH_ROM);
 #endif
  memset(eeprom, 0xFFU, 2048U);
+#endif
  return;
 }
 
@@ -115,7 +150,9 @@ ex_fail:
 */
 void eepdump_save(uint8 const* eeprom)
 {
-#ifdef FLAG_SELFCONT
+#ifdef __EMSCRIPTEN__
+ eepdump_web_save(eeprom);
+#elif defined(FLAG_SELFCONT)
  FILE* file;
  char* path;
 

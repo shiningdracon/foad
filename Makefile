@@ -336,6 +336,32 @@ linux-smoke: linux-x64
 linux-clean:
 	$(MAKE) -C $(LINUX_PORT_DIR) clean
 
+## Browser / WebAssembly port
+WEB_OUT_DIR = $(OUTDIR)/web
+EM_CACHE_DIR ?= /tmp/foad-emscripten-cache
+
+.PHONY: web web-run web-smoke web-clean
+web:
+	@command -v emcc >/dev/null || { echo "error: Emscripten is required (emcc was not found)" >&2; exit 1; }
+	@mkdir -p $(WEB_OUT_DIR) $(EM_CACHE_DIR)
+	EM_CACHE=$(EM_CACHE_DIR) $(MAKE) -C $(LINUX_PORT_DIR) all \
+		TSYS=emscripten OBD=_obj_web_ \
+		OUT=../../$(WEB_OUT_DIR)/index.html WEB_SHELL=../../web/shell.html
+
+web-run: web
+	@echo "Open http://localhost:8000"
+	python3 -m http.server 8000 --directory $(WEB_OUT_DIR)
+
+web-smoke: web
+	@test -s $(WEB_OUT_DIR)/index.html
+	@test -s $(WEB_OUT_DIR)/index.js
+	@test -s $(WEB_OUT_DIR)/index.wasm
+	@echo "WebAssembly build smoke test passed"
+
+web-clean:
+	$(MAKE) -C $(LINUX_PORT_DIR) clean TSYS=emscripten OBD=_obj_web_ OUT=../../$(WEB_OUT_DIR)/index.html
+	-rm -rf $(WEB_OUT_DIR)
+
 ## Clean target
 .PHONY: clean
 clean:

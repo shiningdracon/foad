@@ -273,18 +273,6 @@ boole guicore_init(auint flags, const char* title)
   goto fail_qt;
  }
 
-#ifdef __EMSCRIPTEN__
-
-  /* Scale output so the game wouldn't have to be played on a tiny stamp */
-
-  EM_ASM_({
-    var canvas = Module['canvas'];
-    canvas.style.setProperty("width", $0 + "px", "important");
-    canvas.style.setProperty("height", $1 + "px", "important");
-  }, wndw, wndh);
-
-#endif
-
  /* For some reason in Emscripten the shifts from the format are missing. Work
  ** it around by determining them using the masks */
 

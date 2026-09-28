@@ -90,6 +90,32 @@ for provenance and licensing details.
 
 
 
+Browser / WebAssembly port
+------------------------------------------------------------------------------
+
+
+The game can also be compiled to WebAssembly and played directly in a modern
+browser. Install Emscripten, then build with::
+
+  make web
+
+The deployable static site is generated in ``_bin_/web``. Preview it locally
+with::
+
+  make web-run
+
+and open ``http://localhost:8000``. The page must be served over HTTP rather
+than opened as a local file because the browser fetches the WebAssembly
+module separately. Deploy ``index.html``, ``index.js`` and ``index.wasm``
+together to any static web host.
+
+The browser version supports keyboard and on-screen touch controls,
+fullscreen play, audio, and persistent high scores backed by browser local
+storage.
+
+
+
+
 Controls
 ------------------------------------------------------------------------------
 
