@@ -397,11 +397,11 @@ linux-smoke-zh: linux-x64-zh
 	@$(MAKE) -C $(LINUX_PORT_DIR) smoke OBD=_obj_zh_ OUT=../../$(ZH_LINUX_OUT) \
 		GAMEFILE=../../$(ZH_ROM) GAMEFILE_C=_obj_zh_/gamefile.c EXTRA_CFLAGS=-DFOAD_ZH_CN=1
 
-$(ZH_WEB_SHELL): web/shell.html
+$(ZH_WEB_SHELL): web/shell.html Makefile
 	@mkdir -p $(dir $@)
-	sed -e 's#<title>Flight of a Dragon</title>#<title>飞龙逃亡</title>#' \
+	sed -e 's#<title>Flight of a Dragon</title>#<title>龙之逃亡</title>#' \
 		-e 's#A Uzebox adventure · WebAssembly edition#UZebox 冒险 · WebAssembly 中文版#' \
-		-e 's#<h1>Flight of a Dragon</h1>#<h1>飞龙逃亡</h1>#' $< >$@
+		-e 's#<h1>Flight of a Dragon</h1>#<h1>龙之逃亡</h1>#' $< >$@
 
 web-zh: zh-rom $(ZH_WEB_SHELL)
 	@command -v emcc >/dev/null || { echo "error: Emscripten is required (emcc was not found)" >&2; exit 1; }
