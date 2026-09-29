@@ -87,19 +87,7 @@
       outline: none;
     }
 
-    #start-screen {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      background: rgba(3, 3, 4, .76);
-      backdrop-filter: blur(5px);
-      transition: opacity .2s ease;
-    }
-
-    #start-screen.hidden { opacity: 0; pointer-events: none; }
-
-    .start-button, .utility-button {
+    .utility-button {
       border: 1px solid rgba(255, 225, 174, .45);
       color: #1b1008;
       background: linear-gradient(180deg, #f4bc66, #cf7439);
@@ -107,14 +95,6 @@
       font: inherit;
       font-weight: 800;
       cursor: pointer;
-    }
-
-    .start-button {
-      min-width: 180px;
-      padding: 16px 24px;
-      border-radius: 999px;
-      font-size: 1rem;
-      letter-spacing: .08em;
     }
 
     .toolbar {
@@ -216,9 +196,6 @@
 
     <section class="console" aria-label="游戏画面">
       <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
-      <div id="start-screen">
-        <button class="start-button" id="start-button" type="button">开始游戏</button>
-      </div>
     </section>
 
     <div class="toolbar">
@@ -258,7 +235,6 @@
   <script>
     const canvas = document.getElementById("canvas");
     const statusNode = document.getElementById("status");
-    const startScreen = document.getElementById("start-screen");
 
     var Module = {
       canvas,
@@ -272,18 +248,14 @@
       }
     };
 
-    function resumeGame() {
-      startScreen.classList.add("hidden");
-      canvas.focus();
+    function resumeAudio() {
       const context = window.SDL && SDL.audioContext;
       if (context && context.state === "suspended") context.resume();
     }
 
-    document.getElementById("start-button").addEventListener("click", resumeGame);
-    canvas.addEventListener("pointerdown", resumeGame);
-    if (new URLSearchParams(location.search).get("autostart") === "1") {
-      window.addEventListener("load", resumeGame);
-    }
+    canvas.addEventListener("pointerdown", () => canvas.focus());
+    document.addEventListener("pointerdown", resumeAudio);
+    document.addEventListener("keydown", resumeAudio);
 
     document.getElementById("fullscreen").addEventListener("click", () => {
       if (Module.requestFullscreen) Module.requestFullscreen(false, false);
