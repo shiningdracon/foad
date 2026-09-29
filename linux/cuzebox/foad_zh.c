@@ -18,6 +18,9 @@
 #define FOAD_ZH_VRAM_INTRO 0x0C98U
 #define FOAD_ZH_SPACE      0x60U
 #define FOAD_ZH_PITCH      640U
+/* Mode 74's first VRAM column begins here in the rendered pixel buffer. */
+#define FOAD_ZH_XBASE       22U
+#define FOAD_ZH_CELL_WIDTH  18U
 
 #include "foad_zh_glyphs.h"
 
@@ -56,7 +59,7 @@ static uint32 foad_zh_text_color(
 
  guicore_getpixfmt(&format);
  for (py = 0U; py < 8U; py++){
-  for (px = 0U; px < 18U; px++){
+  for (px = 0U; px < FOAD_ZH_CELL_WIDTH; px++){
    uint32 candidate = pixels[((y + py) * FOAD_ZH_PITCH) + x + px];
    auint difference = foad_zh_color_difference(candidate, background, &format);
    if (difference > best_difference){
@@ -81,7 +84,7 @@ static void foad_zh_character(
  auint sx;
 
  for (py = 0U; py < 16U; py++){
-  for (px = 0U; px < 36U; px++){
+  for (px = 0U; px < (FOAD_ZH_CELL_WIDTH * 2U); px++){
    pixels[((y + py) * FOAD_ZH_PITCH) + x + px] = background;
   }
  }
@@ -131,7 +134,7 @@ static uint32 foad_zh_screen_text_color(
    uint8 code = cpu->sram[vram + (y * 32U) + x];
    if (foad_zh_has_glyph(&(foad_zh_glyphs[code][0])) &&
        (cpu->sram[vram + (y * 32U) + x + 1U] == FOAD_ZH_SPACE)){
-    auint xpos = 40U + (x * 18U);
+    auint xpos = FOAD_ZH_XBASE + (x * FOAD_ZH_CELL_WIDTH);
     auint ypos = ybase + (y * 8U);
     uint32 background =
         pixels[((ypos + 4U) * FOAD_ZH_PITCH) + xpos + 27U];
@@ -192,7 +195,7 @@ void foad_zh_draw(void)
    uint16 const* glyph = &(foad_zh_glyphs[code][0]);
    if (foad_zh_has_glyph(glyph) &&
        (cpu->sram[vram + (y * 32U) + x + 1U] == FOAD_ZH_SPACE)){
-    auint xpos = 40U + (x * 18U);
+    auint xpos = FOAD_ZH_XBASE + (x * FOAD_ZH_CELL_WIDTH);
     auint ypos = ybase + (y * 8U);
     uint32 background =
         pixels[((ypos + 4U) * FOAD_ZH_PITCH) + xpos + 27U];
