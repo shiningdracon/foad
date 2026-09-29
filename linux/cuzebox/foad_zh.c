@@ -113,6 +113,39 @@ static boole foad_zh_has_glyph(uint16 const* glyph)
  return bits != 0U;
 }
 
+static boole foad_zh_is_glyph_pair(
+    cu_state_cpu_t const* cpu,
+    auint vram,
+    auint x)
+{
+ uint8 code;
+
+ if (x >= 31U){
+  return FALSE;
+ }
+
+ code = cpu->sram[vram + x];
+ return foad_zh_has_glyph(&(foad_zh_glyphs[code][0])) &&
+        (cpu->sram[vram + x + 1U] == FOAD_ZH_SPACE);
+}
+
+static boole foad_zh_is_text_glyph(
+    cu_state_cpu_t const* cpu,
+    auint vram,
+    auint x,
+    auint xstart)
+{
+ /* Lowercase Latin letters share character codes with localized glyphs.
+ ** Requiring an adjacent Han/space pair distinguishes actual double-width
+ ** Chinese text from isolated collisions such as high-score name endings. */
+ if (!foad_zh_is_glyph_pair(cpu, vram, x)){
+  return FALSE;
+ }
+ return ((x >= (xstart + 2U)) &&
+         foad_zh_is_glyph_pair(cpu, vram, x - 2U)) ||
+        ((x < 29U) && foad_zh_is_glyph_pair(cpu, vram, x + 2U));
+}
+
 static uint32 foad_zh_screen_text_color(
     cu_state_cpu_t const* cpu,
     uint32 const* pixels,
@@ -131,9 +164,8 @@ static uint32 foad_zh_screen_text_color(
  guicore_getpixfmt(&format);
  for (y = 0U; y < rows; y++){
   for (x = xstart; x < 30U; x++){
-   uint8 code = cpu->sram[vram + (y * 32U) + x];
-   if (foad_zh_has_glyph(&(foad_zh_glyphs[code][0])) &&
-       (cpu->sram[vram + (y * 32U) + x + 1U] == FOAD_ZH_SPACE)){
+   auint line = vram + (y * 32U);
+   if (foad_zh_is_text_glyph(cpu, line, x, xstart)){
     auint xpos = FOAD_ZH_XBASE + (x * FOAD_ZH_CELL_WIDTH);
     auint ypos = ybase + (y * 8U);
     uint32 background =
@@ -191,10 +223,10 @@ void foad_zh_draw(void)
 
  for (y = 0U; y < rows; y++){
   for (x = xstart; x < 30U; x++){
-   uint8 code = cpu->sram[vram + (y * 32U) + x];
+   auint line = vram + (y * 32U);
+   uint8 code = cpu->sram[line + x];
    uint16 const* glyph = &(foad_zh_glyphs[code][0]);
-   if (foad_zh_has_glyph(glyph) &&
-       (cpu->sram[vram + (y * 32U) + x + 1U] == FOAD_ZH_SPACE)){
+   if (foad_zh_is_text_glyph(cpu, line, x, xstart)){
     auint xpos = FOAD_ZH_XBASE + (x * FOAD_ZH_CELL_WIDTH);
     auint ypos = ybase + (y * 8U);
     uint32 background =
