@@ -269,6 +269,16 @@ void  ginput_sendevent(SDL_Event const* ev)
   if ( (ginput_kbp2_0) ||
        (ginput_kbp2_1) ){ player = 1U; }
 
+#ifndef USE_SDL1
+  /* Some desktop and remote-input stacks report both Shift keys with the
+  ** same symbol. SDL2's physical scancode still distinguishes the right
+  ** key, so handle it before the symbol-based compatibility mapping. */
+  if (ev->key.keysym.scancode == SDL_SCANCODE_RSHIFT){
+   cu_ctr_setsnes_single(player, CU_CTR_SNES_RSH, press);
+   return;
+  }
+#endif
+
   /* Note: For SDL2 the scancode has more sense here, but SDL1 does not
   ** support that. This solution works for now on both. For the Uzem
   ** keymapping both Y and Z triggers SNES_Y, so it remains useful on both a
@@ -322,6 +332,9 @@ void  ginput_sendevent(SDL_Event const* ev)
    case SDLK_s:
     if (!ginput_kbuzem){ cu_ctr_setsnes_single(player, CU_CTR_SNES_A, press); }
     if ( ginput_kbuzem){ cu_ctr_setsnes_single(player, CU_CTR_SNES_B, press); }
+    break;
+   case SDLK_d:
+    cu_ctr_setsnes_single(player, CU_CTR_SNES_RSH, press);
     break;
    case SDLK_y:
     if ( ginput_kbuzem){ cu_ctr_setsnes_single(player, CU_CTR_SNES_Y, press); }

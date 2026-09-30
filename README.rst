@@ -170,7 +170,7 @@ Linux 版的键盘操作按以下方式映射到 SNES 手柄：
 - S 或 W：跳跃（SNES A 或 X）
 - A 或 Q：喷火（SNES B 或 Y）
 - 左 Shift：左肩键（向上看）
-- 右 Shift：右肩键（步行）
+- D 或右 Shift：按住并配合左右方向键步行（右肩键）
 - Enter：Start
 - Space 或 Tab：Select
 - Escape：退出
