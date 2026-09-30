@@ -1,239 +1,221 @@
 
-Flight of a Dragon
+龙之逃亡（Flight of a Dragon）
 ==============================================================================
+
+Forked from: https://github.com/Jubatian/foad
+
+本仓库在原作的基础上做了汉化，并增加了 Linux 和 WebAssembly 支持。
 
 .. image:: screenshot.png
    :align: center
    :width: 100%
 
-:Author:    Sandor Zsuga (Jubatian)
-:License:   GNU GPLv3 (version 3 of the GNU General Public License)
+:作者:      Sandor Zsuga (Jubatian)
+:许可证:    GNU GPLv3（GNU 通用公共许可证第 3 版）
 
 
 
 
-Overview
+概述
 ------------------------------------------------------------------------------
 
 
-Flight of a Dragon is a runner - platformer game for the Uzebox console
-(http://www.uzebox.org) featuring a flightless dragon as protagonist who must
-escape from his prison in an empire which wanted to break and train him to
-use him as a war machine in their conquests.
+《龙之逃亡》是一款为 Uzebox 游戏机（http://www.uzebox.org）制作的
+跑酷平台游戏。主角是一条不会飞的龙，必须逃出帝国的监牢。帝国原想
+驯服并训练他，将他变成征服战争中的战争机器。
 
-As such he is a powerful fire-breather who can easily storm through
-opposition, however the empire has a large and well equipped military all
-around who can grind him down if he wasn't careful. It is also important to
-be fast, to flee before forces could be mustered to thwart his attempt.
+他是一条强大的喷火龙，能轻易冲破阻拦。但帝国拥有遍布各地、装备精良的
+庞大军队，稍有不慎便会被他们消耗至死。行动迅速同样重要：必须在帝国集结
+足够兵力、阻止这次逃亡之前离开。
 
-He doesn't want bloodshed, to be remembered as a monster, so he should be
-cautious to not cause more losses than necessary, and he may also help people
-(prisoners) on his way, supporting a probable uprising against the power.
+他不愿制造流血，更不想被人当作怪物记住，因此应尽量避免不必要的伤亡。
+途中还可以救出其他人（囚犯），为可能反抗帝国权力的起义提供支持。
 
 
 
 
-Requirements
+运行需求
 ------------------------------------------------------------------------------
 
 
-For playing the game you either need an Uzebox (or build something compatible
-using an ATMega644p), see http://www.uzebox.org, or use an emulator such as
-CUzeBox or Uzem. For peripherals you need an SNES controller only (no SD card
-is required).
+要运行游戏，可以使用 Uzebox（或使用 ATMega644p 制作兼容设备），详见
+http://www.uzebox.org；也可以使用 CUzeBox 或 Uzem 等模拟器。外设只需
+一个 SNES 手柄（不需要 SD 卡）。
 
-Game binaries are provided (a .hex and a .uze file, the former can be burned
-in the ATMega directly, the latter can be used with Uzeboxes with an SD card
-slot and a bootloader) in the _bin_ folder, so you don't necessarily need to
-compile if you just want to play it.
+``_bin_`` 目录中已提供游戏二进制文件（``.hex`` 和 ``.uze``）。前者可以
+直接烧录到 ATMega，后者可供带 SD 卡槽和引导程序的 Uzebox 使用。
+如果只想玩游戏，不一定需要自行编译。
 
 
 
 
-Compiling the game
+编译游戏
 ------------------------------------------------------------------------------
 
 
-You need the avr-gcc toolchain to compile the game. It should build fine using
-Make producing the .hex file. To get a .uze file, you need the UzeRom packager
-(packrom) from the UzeBox project, set up its path within the Makefile.
+编译游戏需要 avr-gcc 工具链。使用 Make 即可构建并生成 ``.hex`` 文件。
+如需生成 ``.uze`` 文件，还需要 UzeBox 项目的 UzeRom 打包工具
+（packrom），并在 Makefile 中设置其路径。
 
 
 
 
-Linux x86_64 port
+Linux x86_64 版本
 ------------------------------------------------------------------------------
 
 
-The repository also contains a native Linux x86_64 build. It embeds the
-released game ROM in a small SDL2-based compatibility layer, preserving the
-original gameplay, timing, graphics, sound and controller behavior without
-requiring a separate emulator or ROM file.
+仓库还包含 Linux x86_64 原生版本。它将发布版游戏 ROM 嵌入一个基于
+SDL2 的小型兼容层，无需额外的模拟器或 ROM 文件，同时保留原版的玩法、
+时序、图像、声音和手柄行为。
 
-On Debian or Ubuntu, install the native build dependencies with::
+在 Debian 或 Ubuntu 上，可使用以下命令安装原生构建依赖::
 
   sudo apt install build-essential pkg-config libsdl2-dev
 
-Then build and run it with::
+然后构建并运行::
 
   make linux-x64
   ./_bin_/foad-linux-x64
 
-``make linux-run`` builds and starts the game in one command. High scores are
-stored in SDL's per-user application data directory (normally below
-``~/.local/share/Jubatian/Flight of a Dragon/``).
+``make linux-run`` 可以用一条命令完成构建并启动游戏。高分记录保存在
+SDL 为当前用户分配的应用数据目录中（通常位于
+``~/.local/share/Jubatian/Flight of a Dragon/``）。
 
-The compatibility layer is based on CUzeBox and is included in source form
-under ``linux/cuzebox``. See ``linux/cuzebox/UPSTREAM.md`` and its ``LICENSE``
-for provenance and licensing details.
-
+兼容层基于 CUzeBox，源代码收录在 ``linux/cuzebox`` 中。来源和许可证详情请参阅
+``linux/cuzebox/UPSTREAM.md`` 及其 ``LICENSE`` 文件。
 
 
 
-Browser / WebAssembly port
+
+浏览器 / WebAssembly 版本
 ------------------------------------------------------------------------------
 
 
-The game can also be compiled to WebAssembly and played directly in a modern
-browser. Install Emscripten, then build with::
+游戏也可编译为 WebAssembly，直接在现代浏览器中运行。安装 Emscripten 后，
+使用以下命令构建::
 
   make web
 
-The deployable static site is generated in ``_bin_/web``. Preview it locally
-with::
+可部署的静态站点会生成在 ``_bin_/web`` 中。可使用以下命令在本地预览::
 
   make web-run
 
-and open ``http://localhost:8000``. The page must be served over HTTP rather
-than opened as a local file because the browser fetches the WebAssembly
-module separately. Deploy ``index.html``, ``index.js`` and ``index.wasm``
-together to any static web host.
+然后打开 ``http://localhost:8000``。由于浏览器会单独获取 WebAssembly 模块，
+页面必须通过 HTTP 提供，不能作为本地文件直接打开。部署到任意静态网站托管
+服务时，需同时部署 ``index.html``、``index.js`` 和 ``index.wasm``。
 
-The browser version supports keyboard and on-screen touch controls,
-fullscreen play, audio, and persistent high scores backed by browser local
-storage.
+浏览器版支持键盘和屏幕触摸控制、全屏游戏、音频，以及由浏览器本地存储
+持久保存的高分记录。
 
 
 
 
-Simplified Chinese edition
+简体中文版
 ------------------------------------------------------------------------------
 
 
-The Chinese edition localizes the title, prompts and story panels while
-preserving the original game engine. Each Han character uses two text cells;
-the bundled Linux and browser emulators render a clear 15x16-pixel glyph and
-add extra story-line spacing. It is produced reproducibly from the released
-ROM, so building it does not need the AVR toolchain.
+中文版在保留原游戏引擎的同时，翻译了标题、提示和剧情画面。每个汉字占用两个
+文本格；附带的 Linux 和浏览器模拟器会渲染清晰的 15x16 像素字形，并为剧情
+文本增加额外行距。中文版可从已发布的 ROM 重现生成，因此构建时不需要
+AVR 工具链。
 
-Build the Uzebox ROM files with::
+使用以下命令构建 Uzebox ROM 文件::
 
   make zh-rom
 
-This creates ``_bin_/foad-zh.uze`` and ``_bin_/foad-zh.hex``. Build and run
-the native Linux edition with::
+该命令会生成 ``_bin_/foad-zh.uze`` 和 ``_bin_/foad-zh.hex``。构建并运行
+Linux 原生中文版::
 
   make linux-x64-zh
   ./_bin_/foad-linux-x64-zh
 
-Build the browser edition with::
+构建浏览器中文版::
 
   make web-zh
   make web-run-zh
 
-The English development server uses ``http://localhost:8000`` and the Chinese
-server uses ``http://localhost:8001``. Both disable browser caching so switching
-editions cannot reuse the other build's WebAssembly files. The deployable
-Chinese site is generated in ``_bin_/web-zh``. Chinese and English builds use
-separate high-score storage, so trying one edition cannot overwrite scores from
-the other.
+英文版开发服务器使用 ``http://localhost:8000``，中文版服务器使用
+``http://localhost:8001``。两者都会禁用浏览器缓存，避免切换版本时复用另一版的
+WebAssembly 文件。可部署的中文站点会生成在 ``_bin_/web-zh`` 中。中文版和
+英文版使用独立的高分存储，因此尝试其中一个版本不会覆盖另一个版本的分数。
 
-The emulator overlay is rasterized from Noto Sans CJK SC. It leaves the ROM's
-original global charset untouched because the gameplay status bar shares those
-tile numbers with text. Font notices are included in ``localization/``.
+模拟器覆盖层使用 Noto Sans CJK SC 栅格化字形。它不会修改 ROM 原有的全局字符集，
+因为游戏状态栏与文本共用这些图块编号。字体许可声明收录在 ``localization/`` 中。
 
 
 
 
-Controls
+操作
 ------------------------------------------------------------------------------
 
 
-During the game, the following controls are used:
+游戏中使用以下操作：
 
-- Dpad: Left / Right movement, looking up and down (also for firing angle)
-- A, X: Jump
-- B, Y: Fire
-- Right Shoulder: Walk
-- Left Shoulder: Look up
-- Start + Select (press both): Pause (removes 100 score)
+- 方向键：左右移动、向上或向下瞄准（同时决定喷火角度）
+- A、X：跳跃
+- B、Y：喷火
+- 右肩键：步行
+- 左肩键：向上看
+- Start + Select（同时按下）：暂停（扣除 100 分）
 
-During high score entry, the followings are used:
+输入高分榜姓名时使用以下操作：
 
-- Dpad: Navigate between characters, select character
-- A, X, B, Y, Shoulders: Toggle Upper / Lowercase
-- Enter, Select: Accept name
+- 方向键：在字符之间移动并选择字符
+- A、X、B、Y、肩键：切换大小写
+- Enter、Select：确认姓名
 
-For the Linux build, keyboard controls map to the SNES controller as follows:
+Linux 版的键盘操作按以下方式映射到 SNES 手柄：
 
-- Arrow keys: D-pad
-- S or W: jump (SNES A or X)
-- A or Q: fire (SNES B or Y)
-- Left Shift: left shoulder (look up)
-- Right Shift: right shoulder (walk)
-- Enter: Start
-- Space or Tab: Select
-- Escape: quit
-- F9: pause; F11: toggle fullscreen
+- 方向键：方向键
+- S 或 W：跳跃（SNES A 或 X）
+- A 或 Q：喷火（SNES B 或 Y）
+- 左 Shift：左肩键（向上看）
+- 右 Shift：右肩键（步行）
+- Enter：Start
+- Space 或 Tab：Select
+- Escape：退出
+- F9：暂停；F11：切换全屏
 
-SDL2-compatible game controllers are also supported.
-
-
+同时也支持兼容 SDL2 的游戏手柄。
 
 
-The in-game status displays
+
+
+游戏内状态栏
 ------------------------------------------------------------------------------
 
 
-From left to right, the followings are displayed:
+状态栏从左到右显示以下内容：
 
-- Dragon head: Your health. The amount of health you have contributes to your
-  score on the end of a level.
-- Fireball: Remaining fuel in your flame glands. It replenishes quickly, but
-  you will deplete it by contiguous fire.
-- Double up-arrow: Remaining energy, if it depletes, you run slow and your
-  ability to jump is hindered. Have a rest!
-- Score display: How well you are going. Usually staying alive, collecting
-  stuff and freeing prisoners increment it and killing decrements.
-- Hourglass: How long you have until you are overwhelmed and have to give up.
-  Finishing a level faster increases your score!
+- 龙头：生命值。关卡结束时的剩余生命值会计入得分。
+- 火球：火焰腺中剩余的燃料。燃料恢复很快，但连续喷火会将其耗尽。
+- 双上箭头：剩余体力。体力耗尽后奔跑速度会变慢，跳跃能力也会降低。
+  该休息一下了！
+- 分数：表示当前表现。通常，存活、收集物品和解救囚犯会加分，杀戮会扣分。
+- 沙漏：距离被包围并被迫放弃还剩多少时间。越快完成关卡，得分越高！
 
 
 
 
-Hints
+提示
 ------------------------------------------------------------------------------
 
 
-- Pay attention to your energy (stamina) bar (third bar on the upper left). If
-  it is depleted, you run slower, and can't jump high. You can't catch some
-  ledges without sufficient energy.
+- 注意体力条（左上角第三条）。体力耗尽后，奔跑会变慢，也无法跳得很高。
+  体力不足时，有些平台无法跳上去。
 
-- Initially the dragon doesn't have his full potential. Collect power-ups,
-  without those it might be impossible to finish the game.
+- 龙在游戏开始时尚未发挥出全部潜力。请收集强化道具，否则可能无法通关。
 
-- Always keep moving (unless purposely resting to restore energy). Usually
-  enemies are the least effective when you are running, but be vary of pikemen
-  who charge at you.
+- 始终保持移动（特意停下恢复体力时除外）。奔跑时大多数敌人最难发挥作用，
+  但要小心向你冲锋的长枪兵。
 
 
 
 
-Alternate licenses
+其他许可方式
 ------------------------------------------------------------------------------
 
 
-All the game contents created by Jubatian (Sandor Zsuga) may also be used
-according to the Creative Commons CC-BY-SA 4.0 license. Note that the game
-kernel contains components which are created by various authors (from the
-UzeBox project) which can only be used under GPLv3.
+Jubatian（Sandor Zsuga）创作的所有游戏内容也可依据 Creative Commons
+CC-BY-SA 4.0 许可证使用。请注意，游戏内核包含由 UzeBox 项目多位作者创建的组件，
+这些组件只能在 GPLv3 许可证下使用。
